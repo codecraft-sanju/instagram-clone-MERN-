@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs'; // For password hashing
 import jwt from 'jsonwebtoken'; // For generating JWT token
 import { User } from '../models/userModel.js'; // Importing User model
 
-// 1️⃣ User Registration Controller
+// 1️ User Registration Controller
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -39,7 +39,7 @@ export const registerUser = async (req, res) => {
   }
 };
 
-// 2️⃣ User Login Controller
+// 2️ User Login Controller
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -75,7 +75,7 @@ export const loginUser = async (req, res) => {
   }
 };
 
-// 3️⃣ User Logout Controller
+// 3️ User Logout Controller
 export const logoutUser = (req, res) => {
   try {
     res.cookie('token', '', { expires: new Date(0) });
@@ -86,7 +86,7 @@ export const logoutUser = (req, res) => {
   }
 };
 
-// 4️⃣ Get User Profile (Protected Route)
+// 4️ Get User Profile (Protected Route)
 export const getUserProfile = async (req, res) => {
   try {
     // `req.user` is coming from `isAuth` middleware
