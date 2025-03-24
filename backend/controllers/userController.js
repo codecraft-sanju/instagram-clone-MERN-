@@ -5,7 +5,11 @@ import { User } from '../models/userModel.js'; // Importing User model
 // 1️ User Registration Controller
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, username, email, password } = req.body;
+
+    if (!name || !username || !email || !password) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
 
     // Check if user already exists
     let user = await User.findOne({ email });
@@ -14,25 +18,35 @@ export const registerUser = async (req, res) => {
     }
 
     // Hash the password before saving
-    const salt = await bcrypt.genSalt(10);
+    const salt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Create new user
-    user = await User.create({ name, email, password: hashedPassword });
+    user = await User.create({
+      name,
+      username,
+      email,
+      password: hashedPassword,
+    });
 
     // Generate JWT token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '7d',
+      expiresIn: process.env.JWT_EXPIRES_IN || '7d',
     });
+
+    // Remove password from response
+    const { password: _, ...userData } = user._doc;
 
     // Set token in cookies
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: req.secure || process.env.NODE_ENV === 'production',
       sameSite: 'strict',
     });
 
-    res.status(201).json({ message: 'User registered successfully', user });
+    res
+      .status(201)
+      .json({ message: 'User registered successfully', user: userData });
   } catch (error) {
     console.error('Register Error:', error);
     res.status(500).json({ message: 'Internal Server Error' });
@@ -43,6 +57,10 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
 
     // Check if user exists
     const user = await User.findOne({ email });
@@ -58,17 +76,20 @@ export const loginUser = async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '7d',
+      expiresIn: process.env.JWT_EXPIRES_IN || '7d',
     });
+
+    // Remove password from response
+    const { password: _, ...userData } = user._doc;
 
     // Set token in cookies
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: req.secure || process.env.NODE_ENV === 'production',
       sameSite: 'strict',
     });
 
-    res.status(200).json({ message: 'Login successful', user });
+    res.status(200).json({ message: 'Login successful', user: userData });
   } catch (error) {
     console.error('Login Error:', error);
     res.status(500).json({ message: 'Internal Server Error' });
@@ -89,13 +110,9 @@ export const logoutUser = (req, res) => {
 // 4️ Get User Profile (Protected Route)
 export const getUserProfile = async (req, res) => {
   try {
-    // `req.user` is coming from `isAuth` middleware
-    const user = req.user;
-
-    res.status(200).json({
-      message: 'User profile fetched successfully',
-      user,
-    });
+    res
+      .status(200)
+      .json({ message: 'User profile fetched successfully', user: req.user });
   } catch (error) {
     console.error('Profile Error:', error);
     res.status(500).json({ message: 'Internal Server Error' });
