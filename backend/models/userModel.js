@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema(
     username: {
       type: String,
       required: true,
-      unique: true, //  Keep this only, don't add .index()
+      unique: true,
       trim: true,
     },
     password: {
@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: true,
-      unique: true, //  Keep this only, don't add .index()
+      unique: true, 
       lowercase: true,
       trim: true,
     },
@@ -46,5 +46,5 @@ const userSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-//  FIX: Remove the duplicate .index() definitions
+
 export const User = mongoose.model('User', userSchema);

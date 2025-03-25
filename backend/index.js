@@ -7,13 +7,19 @@ import userRoute from './routes/userRoutes.js';
 
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 //  Fix: Show clear environment status
 console.log(` Running in ${process.env.NODE_ENV} mode`);
 
 // Middlewares
-app.use(cors());
+
+app.use(
+  cors({
+    origin: 'http://localhost:5173', // Allow frontend
+    credentials: true, // Allow cookies/sessions
+  }),
+);
 app.use(express.json());
 app.use(cookieparser());
 
