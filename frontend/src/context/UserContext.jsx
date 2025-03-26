@@ -20,7 +20,6 @@ export const UserProvider = ({ children }) => {
             navigate("/");
         } catch (error) {
             console.log(error.response?.data?.message || "Registration failed");
-            toast.error(error.response?.data?.message || "Registration failed");
             setBtnLoading(false);
         }
     }
@@ -33,11 +32,10 @@ export const UserProvider = ({ children }) => {
             toast.success(data.message);
             setIsAuth(true);
             setBtnLoading(false);
-            window.location.reload();
             navigate("/");
+            window.location.reload();
         } catch (error) {
             console.log(error.response?.data?.message || "Login failed");
-            toast.error(error.response?.data?.message || "Login failed");
             setBtnLoading(false);
         }
     }
@@ -51,7 +49,6 @@ export const UserProvider = ({ children }) => {
             setLoading(false);
         } catch (error) {
             console.log(error.response?.data?.message || "Fetching user failed");
-            toast.error(error.response?.data?.message || "Fetching user failed");
             setLoading(false);
         }
     }
@@ -69,9 +66,9 @@ export const UserProvider = ({ children }) => {
             setIsAuth(false);
             setUser(null);
             setBtnLoading(false);
+            window.location.reload();
         } catch (error) {
             console.log(error.response?.data?.message || "Logout failed");
-            toast.error(error.response?.data?.message || "Logout failed");
             setBtnLoading(false);
         }
     }
