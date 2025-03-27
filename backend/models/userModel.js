@@ -37,6 +37,7 @@ const userSchema = new mongoose.Schema(
       enum: ['user', 'admin'],
       default: 'user',
     },
+    stories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Story' }],
     notifications: [
       {
         type: String,
