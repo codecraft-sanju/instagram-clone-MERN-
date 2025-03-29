@@ -5,6 +5,7 @@ import cors from 'cors';
 import { connectDb } from './database/db.js';
 import userRoute from './routes/userRoutes.js';
 import storyRoute from './routes/storyRoutes.js';
+import postRoute from './routes/postRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -27,6 +28,7 @@ app.use(cookieparser());
 // Routes
 app.use('/api', userRoute);
 app.use('/api/stories', storyRoute);
+app.use('/api/posts', postRoute);
 
 // Server
 app.listen(PORT, () => {

@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs'; // For password hashing
 import jwt from 'jsonwebtoken'; // For generating JWT token
 import { User } from '../models/userModel.js'; // Importing User model
+import cloudinary from 'cloudinary';
 
 // 1️ User Registration Controller
 export const registerUser = async (req, res) => {
@@ -117,5 +118,46 @@ export const getUserProfile = async (req, res) => {
   } catch (error) {
     console.error('Profile Error:', error);
     res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+export const updateProfilePicture = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded!' });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    if (user.profilePicture?.id) {
+      await cloudinary.v2.uploader.destroy(user.profilePicture.id);
+    }
+
+    
+    await User.updateOne(
+      { _id: req.user._id },
+      {
+        $set: {
+          profilePicture: {
+            id: req.file.filename,
+            url: req.file.path,
+          },
+        },
+      },
+    );
+
+    res.status(200).json({
+      message: 'Profile picture updated successfully!',
+      profilePicture: {
+        id: req.file.filename,
+        url: req.file.path,
+      },
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: 'Something went wrong', error: error.message });
   }
 };

@@ -73,8 +73,25 @@ export const UserProvider = ({ children }) => {
         }
     }
 
+    async function updateProfilePic(file) {
+        setBtnLoading(true);
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+            const { data } = await axios.put('/api/profile-picture', formData, {
+                headers:{"Content-Type":"multipart/form-data"}
+            })
+            toast.success(data.message);
+            setUser(prevUser => ({ ...prevUser, profilePicture: data.profilePicture }));
+            setBtnLoading(false);
+        } catch (error) {
+            toast.error(error.response.data.message);
+            setBtnLoading(false);
+        }
+    }
+
     return (
-        <UserContext.Provider value={{ user, isAuth, registerUser, loginUser, logoutUser, loading, btnLoading }}>
+        <UserContext.Provider value={{ user, isAuth, registerUser, loginUser, logoutUser, loading, btnLoading,updateProfilePic }}>
             {children}
             <Toaster />
         </UserContext.Provider>

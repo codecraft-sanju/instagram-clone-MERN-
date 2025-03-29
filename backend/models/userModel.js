@@ -37,6 +37,10 @@ const userSchema = new mongoose.Schema(
       enum: ['user', 'admin'],
       default: 'user',
     },
+    profilePicture: {
+      id: String,
+      url:String
+    },
     stories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Story' }],
     notifications: [
       {

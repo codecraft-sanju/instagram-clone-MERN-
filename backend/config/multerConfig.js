@@ -5,11 +5,24 @@ import cloudinary from './cloudinary.js';
 // Cloudinary Storage Setup
 const storage = new CloudinaryStorage({
   cloudinary,
-  params: {
-    folder: 'instagram-clone-stories', // this folder be created in cloudinary
-    allowed_formats: ['jpg', 'jpeg', 'png', 'mp4', 'mov'],
-    resource_type: 'auto',
+  params: (req, file) => {
+    let folderName = 'instagram-clone-uploads'; // Default folder
+
+    if (req.baseUrl.includes('/profile')) {
+      folderName = 'instagram-clone-profile-pictures';
+    } else if (req.baseUrl.includes('/stories')) {
+      folderName = 'instagram-clone-stories';
+    } else if (req.baseUrl.includes('/posts')) {
+      folderName = 'instagram-clone-posts';
+    }
+
+    return {
+      folder: folderName,
+      format: file.mimetype.split('/')[1], // Extract format from MIME type
+      resource_type: 'auto',
+    };
   },
 });
 
+// Multer Middleware
 export const upload = multer({ storage });
