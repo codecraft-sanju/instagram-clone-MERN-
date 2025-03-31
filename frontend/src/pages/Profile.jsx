@@ -13,7 +13,7 @@ import { usePost } from '../context/PostContext';
 const Profile = () => {
   const [activeTab, setActiveTab] = useState('posts');
   const { user, updateProfilePic, btnLoading } = useUser();
-  const { posts, fetchUserPosts } = usePost();
+  const { userPosts, fetchUserPosts } = usePost(); // 🔹 Change here
 
   useEffect(() => {
     if (user?.user?._id) {
@@ -68,7 +68,7 @@ const Profile = () => {
               {user?.user?.bio || 'No bio available'}
             </p>
             <div className="flex justify-center md:justify-start gap-6 mt-3 text-gray-300">
-              <span>{posts?.length || 0} Posts</span>
+              <span>{userPosts?.length || 0} Posts</span> {/* 🔹 Change here */}
               <span>{user?.user?.followers?.length || 0} Followers</span>
               <span>{user?.user?.following?.length || 0} Following</span>
             </div>
@@ -94,8 +94,8 @@ const Profile = () => {
         {/* Posts Grid */}
         {activeTab === 'posts' && (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-2 mt-4">
-            {posts?.length > 0 ? (
-              posts.map((post) => (
+            {userPosts?.length > 0 ? ( //  Change here
+              userPosts.map((post) => (
                 <img
                   key={post._id}
                   src={post.image}

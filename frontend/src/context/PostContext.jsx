@@ -4,14 +4,15 @@ import axios from 'axios';
 const PostContext = createContext();
 
 export const PostProvider = ({ children }) => {
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState([]); // All posts for feed
+  const [userPosts, setUserPosts] = useState([]); // Specific user posts
   const [loading, setLoading] = useState(false);
 
   // Fetch all posts (for feed)
   const fetchPosts = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get('/api/posts'); // Backend route should match
+      const { data } = await axios.get('/api/posts');
       setPosts(data);
     } catch (error) {
       console.error(
@@ -27,7 +28,7 @@ export const PostProvider = ({ children }) => {
     setLoading(true);
     try {
       const { data } = await axios.get(`/api/posts/user/${userId}`);
-      setPosts(data);
+      setUserPosts(data); // Now storing in separate state
     } catch (error) {
       console.error(
         'Error fetching user posts:',
@@ -37,36 +38,33 @@ export const PostProvider = ({ children }) => {
     setLoading(false);
   };
 
- const createPost = async (file) => {
-   try {
-     const formData = new FormData();
-     formData.append('file', file); 
-     formData.append('caption', ''); 
+  const createPost = async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('caption', '');
 
-     const { data } = await axios.post('/api/posts/create', formData, {
-       withCredentials: true,
-       headers: {
-         'Content-Type': 'multipart/form-data',
-       },
-     });
+      const { data } = await axios.post('/api/posts/create', formData, {
+        withCredentials: true,
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
 
-     setPosts((prevPosts) => [data.post, ...prevPosts]);
-   } catch (error) {
-     console.error(
-       'Error creating post:',
-       error.response?.data?.message || error.message,
-     );
-   }
- };
-
+      setPosts((prevPosts) => [data.post, ...prevPosts]);
+    } catch (error) {
+      console.error(
+        'Error creating post:',
+        error.response?.data?.message || error.message,
+      );
+    }
+  };
 
   useEffect(() => {
-    fetchPosts(); // Auto-fetch posts on component mount
+    fetchPosts(); // Auto-fetch posts on mount
   }, []);
 
   return (
     <PostContext.Provider
-      value={{ posts, loading, fetchUserPosts, createPost }}
+      value={{ posts, userPosts, loading, fetchUserPosts, createPost }}
     >
       {children}
     </PostContext.Provider>
