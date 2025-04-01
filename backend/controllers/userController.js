@@ -161,3 +161,46 @@ export const updateProfilePicture = async (req, res) => {
       .json({ message: 'Something went wrong', error: error.message });
   }
 };
+
+
+
+// 5️ Follow User Controller
+export const followUser = async (req, res) => {
+  try {
+    const { userId } = req.body;  // The user to be followed
+
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required' });
+    }
+
+    // Find the logged-in user and the user to be followed
+    const loggedInUser = await User.findById(req.user._id);
+    const userToFollow = await User.findById(userId);
+
+    if (!userToFollow) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check if the user is already following the other user
+    if (loggedInUser.following.includes(userId)) {
+      return res.status(400).json({ message: 'You are already following this user' });
+    }
+
+    // Add the user to the logged-in user's following list
+    loggedInUser.following.push(userId);
+
+    // Add the logged-in user to the followed user's followers list
+    userToFollow.followers.push(req.user._id);
+
+    // Save both users
+    await loggedInUser.save();
+    await userToFollow.save();
+
+    res.status(200).json({ message: 'User followed successfully' });
+  } catch (error) {
+    console.error('Follow Error:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+
