@@ -5,6 +5,7 @@ import {
   logoutUser,
   getUserProfile,
   updateProfilePicture,
+  getAllUser
  
 } from '../controllers/userController.js';
 
@@ -19,6 +20,7 @@ router.post('/register', registerUser);
 router.post('/login', loginUser);
 router.post('/logout', logoutUser);
 router.get('/profile', isAuth, getUserProfile);
+router.get('/getall',isAuth,getAllUser)
 router.put(
   '/profile-picture',
   isAuth,

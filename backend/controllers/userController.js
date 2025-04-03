@@ -1,7 +1,7 @@
-import bcrypt from 'bcryptjs'; 
-import jwt from 'jsonwebtoken'; 
-import { User } from '../models/userModel.js'; 
+import bcrypt from 'bcryptjs';
 import cloudinary from 'cloudinary';
+import jwt from 'jsonwebtoken';
+import { User } from '../models/userModel.js';
 
 // 1️ User Registration Controller
 export const registerUser = async (req, res) => {
@@ -40,7 +40,7 @@ export const registerUser = async (req, res) => {
 
     // Set token in cookies
     res.cookie('token', token, {
-      maxAge: 7 * 24 * 60 * 60 * 1000 ,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
       httpOnly: true,
       secure: req.secure || process.env.NODE_ENV === 'production',
       sameSite: 'strict',
@@ -121,6 +121,16 @@ export const getUserProfile = async (req, res) => {
   }
 };
 
+export const getAllUser = async (req, res) => {
+  try {
+    const users = await User.find().sort({ createdAt: -1 });
+    res.json(users);
+  } catch (error) {
+    console.log(error.message);
+    res.json(500).json({ message: 'Error while fetching all users' });
+  }
+};
+
 export const updateProfilePicture = async (req, res) => {
   try {
     if (!req.file) {
@@ -135,7 +145,6 @@ export const updateProfilePicture = async (req, res) => {
       await cloudinary.v2.uploader.destroy(user.profilePicture.id);
     }
 
-    
     await User.updateOne(
       { _id: req.user._id },
       {
@@ -161,4 +170,3 @@ export const updateProfilePicture = async (req, res) => {
       .json({ message: 'Something went wrong', error: error.message });
   }
 };
-

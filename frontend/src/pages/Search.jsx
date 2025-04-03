@@ -1,18 +1,25 @@
-import React, { useState } from "react";
-import { X } from "lucide-react"; // Cross Icon
-
-const initialUsers = [
-  { username: "sanjay_singh_chouhan_joyala", profilePic: "" },
-  { username: "Ox_chirag_0x", profilePic: "" },
-];
+import React, { useState } from 'react';
+import { X } from 'lucide-react';
+import { useUser } from '../context/UserContext';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const Search = () => {
-  const [users, setUsers] = useState(initialUsers);
+  const { users } = useUser(); // Fetching all users from context
+  const [searchTerm, setSearchTerm] = useState('');
+  const [recentSearches, setRecentSearches] = useState(users); // Storing searched users
+  const navigate = useNavigate(); // Initialize navigate
 
   // Function to remove user from recent searches
   const removeUser = (username) => {
-    setUsers(users.filter((user) => user.username !== username));
+    setRecentSearches((prevUsers) =>
+      prevUsers.filter((user) => user.username !== username),
+    );
   };
+
+  // Function to handle search filtering
+  const filteredUsers = users.filter((user) =>
+    user.username.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
   return (
     <div className="flex justify-center w-full min-h-screen bg-gray-950 p-6 text-white">
@@ -21,16 +28,20 @@ const Search = () => {
         <input
           type="text"
           placeholder="Search"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full p-3 rounded-full bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
         />
 
         {/* Recent Searches */}
         <div className="mt-6 bg-gray-900 p-4 rounded-lg shadow-md">
           <div className="flex justify-between items-center mb-3">
-            <h2 className="text-lg font-semibold text-gray-400">Recent Searches</h2>
-            {users.length > 0 && (
+            <h2 className="text-lg font-semibold text-gray-400">
+              Recent Searches
+            </h2>
+            {recentSearches.length > 0 && (
               <button
-                onClick={() => setUsers([])}
+                onClick={() => setRecentSearches([])}
                 className="text-gray-400 hover:text-white text-sm"
               >
                 Clear all
@@ -38,27 +49,41 @@ const Search = () => {
             )}
           </div>
 
+          {/* Users List */}
           <div className="space-y-3">
-            {users.map((user) => (
-              <div
-                key={user.username}
-                className="flex items-center justify-between p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition duration-300 cursor-pointer"
-              >
-                <div className="flex items-center gap-4">
-                  <img
-                    src={user.profilePic}
-                    alt={user.username}
-                    className="w-10 h-10 rounded-full bg-gray-600"
+            {filteredUsers.length > 0 ? (
+              filteredUsers.map((user) => (
+                <div
+                  key={user._id}
+                  onClick={() => navigate(`/search/${user._id}`)} // Navigate to /search/:id
+                  className="flex items-center justify-between p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition duration-300 cursor-pointer"
+                >
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={
+                        user.profilePicture?.url ||
+                        'https://via.placeholder.com/50'
+                      }
+                      alt={user.username}
+                      className="w-10 h-10 rounded-full bg-gray-600"
+                    />
+                    <span className="text-white text-lg">{user.username}</span>
+                  </div>
+                  <X
+                    size={20}
+                    className="text-gray-400 hover:text-white cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent navigation on X click
+                      removeUser(user.username);
+                    }}
                   />
-                  <span className="text-white text-lg">{user.username}</span>
                 </div>
-                <X
-                  size={20}
-                  className="text-gray-400 hover:text-white cursor-pointer"
-                  onClick={() => removeUser(user.username)}
-                />
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-gray-400 text-sm text-center">
+                No users found
+              </p>
+            )}
           </div>
         </div>
       </div>

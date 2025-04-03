@@ -6,11 +6,12 @@ const PostContext = createContext();
 export const PostProvider = ({ children }) => {
   const [posts, setPosts] = useState([]); // All posts for feed
   const [userPosts, setUserPosts] = useState([]); // Specific user posts
-  const [loading, setLoading] = useState(false);
+  const [loadingPosts, setLoadingPosts] = useState(false); // For feed posts
+  const [loadingUserPosts, setLoadingUserPosts] = useState(false); // For user-specific posts
 
   // Fetch all posts (for feed)
   const fetchPosts = async () => {
-    setLoading(true);
+    setLoadingPosts(true);
     try {
       const { data } = await axios.get('/api/posts');
       setPosts(data);
@@ -20,22 +21,22 @@ export const PostProvider = ({ children }) => {
         error.response?.data?.message || error.message,
       );
     }
-    setLoading(false);
+    setLoadingPosts(false);
   };
 
   // Fetch posts for a specific user
   const fetchUserPosts = async (userId) => {
-    setLoading(true);
+    setLoadingUserPosts(true);
     try {
       const { data } = await axios.get(`/api/posts/user/${userId}`);
-      setUserPosts(data); // Now storing in separate state
+      setUserPosts(data);
     } catch (error) {
       console.error(
         'Error fetching user posts:',
         error.response?.data?.message || error.message,
       );
     }
-    setLoading(false);
+    setLoadingUserPosts(false);
   };
 
   const createPost = async (file) => {
@@ -64,7 +65,14 @@ export const PostProvider = ({ children }) => {
 
   return (
     <PostContext.Provider
-      value={{ posts, userPosts, loading, fetchUserPosts, createPost }}
+      value={{
+        posts,
+        userPosts,
+        loadingPosts,
+        loadingUserPosts,
+        fetchUserPosts,
+        createPost,
+      }}
     >
       {children}
     </PostContext.Provider>

@@ -6,6 +6,7 @@ const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    const [users, setUsers] = useState([]);
     const [isAuth, setIsAuth] = useState(false);
     const [btnLoading, setBtnLoading] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -53,8 +54,23 @@ export const UserProvider = ({ children }) => {
         }
     }
 
+    // fetch all users
+    async function fetchAllUsers() {
+        setLoading(true);
+        try {
+            const { data } = await axios.get('/api/getall');
+            setUsers(data);
+            setIsAuth(true);
+            setLoading(false);
+        } catch (error) {
+            console.log(error.response.data.message);
+            setLoading(false);
+        }
+    }
+
     useEffect(() => {
         fetchUser();
+        fetchAllUsers();
     }, []);
 
     // Logout User
@@ -91,7 +107,7 @@ export const UserProvider = ({ children }) => {
     }
 
     return (
-        <UserContext.Provider value={{ user, isAuth, registerUser, loginUser, logoutUser, loading, btnLoading,updateProfilePic }}>
+        <UserContext.Provider value={{ user, isAuth, registerUser, loginUser, logoutUser, loading, btnLoading,updateProfilePic,users }}>
             {children}
             <Toaster />
         </UserContext.Provider>

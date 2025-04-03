@@ -7,6 +7,7 @@ import Profile from "./pages/Profile";
 import Search from "./pages/Search";  // Import Search Page
 import Sidebar from "./components/Sidebar";
 import Loading from "./components/Loading";
+import SearchUser from "./pages/SearchUser";
 
 
 
@@ -25,7 +26,8 @@ function AppContent() {
             <Route path="/login" element={isAuth ? <Home/> : <Login />} />
             <Route path="/register" element={isAuth ? <Navigate to="/" /> : <Register />} />
             <Route path="/profile" element={isAuth ? <Profile/> : <Login/>} />
-            <Route path="/search" element={isAuth ? <Search/> : <Login/>} />
+            <Route path="/search" element={isAuth ? <Search /> : <Login />} />
+            <Route path="/search/:id" element={isAuth ? <SearchUser/> :<Login/>} />
           </Routes>
         </div>
       </div>
