@@ -7,6 +7,7 @@ import { PostProvider } from './context/PostContext.jsx';
 import { FollowProvider } from './context/followContext.jsx';
 import { Provider } from 'react-redux'; 
 import store from './redux/store'; 
+import { Toaster } from 'react-hot-toast';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -15,6 +16,7 @@ createRoot(document.getElementById('root')).render(
         <PostProvider>
           <FollowProvider>
             <App />
+            <Toaster position="top-right" reverseOrder={false} />
           </FollowProvider>
         </PostProvider>
       </UserProvider>

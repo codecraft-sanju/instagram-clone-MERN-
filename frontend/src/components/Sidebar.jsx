@@ -15,7 +15,9 @@ import {
   Settings,
   Camera,
   Image as Gallery,
-  Loader2, // Loading Icon
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { useUser } from '../context/UserContext';
 import { usePost } from '../context/PostContext';
@@ -25,18 +27,14 @@ const Sidebar = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const { logoutUser } = useUser();
   const { createPost } = usePost();
 
-  const handleModalChange = () => {
-    setIsModalOpen((prev) => !prev);
-  };
-
-  const handleCreateModalChange = () => {
-    setIsCreateModalOpen((prev) => !prev);
-  };
+  const handleModalChange = () => setIsModalOpen((prev) => !prev);
+  const handleCreateModalChange = () => setIsCreateModalOpen((prev) => !prev);
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
@@ -53,24 +51,19 @@ const Sidebar = () => {
     }
   };
 
-  // 📸 Camera Open Function
   const openCamera = async () => {
     setIsCameraOpen(true);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
+      if (videoRef.current) videoRef.current.srcObject = stream;
     } catch (error) {
       console.error('Error accessing camera:', error);
       setIsCameraOpen(false);
     }
   };
 
-  // 📸 Capture Photo
   const capturePhoto = async () => {
     if (!videoRef.current || !canvasRef.current) return;
-
     const context = canvasRef.current.getContext('2d');
     canvasRef.current.width = videoRef.current.videoWidth;
     canvasRef.current.height = videoRef.current.videoHeight;
@@ -79,7 +72,6 @@ const Sidebar = () => {
     canvasRef.current.toBlob(async (blob) => {
       if (!blob) return;
       setLoading(true);
-
       try {
         await createPost(blob);
         setIsCameraOpen(false);
@@ -91,42 +83,88 @@ const Sidebar = () => {
     }, 'image/jpeg');
   };
 
-  return (
-    <div className="flex flex-col h-screen bg-black w-72 text-white p-6 fixed left-0 top-0">
-      <h1 className="font-mono text-2xl mb-4">Instagram</h1>
+  const menuItems = [
+    { icon: Home, label: 'Home', link: '/' },
+    { icon: Search, label: 'Search', link: '/search' },
+    { icon: Compass, label: 'Explore', link: '/explore' },
+    { icon: Video, label: 'Reels', link: '/reels' },
+    { icon: MessageCircle, label: 'Messages', link: '/messages' },
+    { icon: Heart, label: 'Notifications', link: '/notifications' },
+    {
+      icon: Plus,
+      label: 'Create',
+      link: '#',
+      onClick: handleCreateModalChange,
+    },
+    { icon: BarChart, label: 'Dashboard', link: '/dashboard' },
+    { icon: User, label: 'Profile', link: '/profile' },
+  ];
 
-      <div className="flex flex-col flex-grow justify-between">
-        {[
-          { icon: Home, label: 'Home', link: '/' },
-          { icon: Search, label: 'Search', link: '/search' },
-          { icon: Compass, label: 'Explore', link: '/explore' },
-          { icon: Video, label: 'Reels', link: '/reels' },
-          { icon: MessageCircle, label: 'Messages', link: '/messages' },
-          { icon: Heart, label: 'Notifications', link: '/notifications' },
-          {
-            icon: Plus,
-            label: 'Create',
-            link: '#',
-            onClick: handleCreateModalChange,
-          },
-          { icon: BarChart, label: 'Dashboard', link: '/dashboard' },
-          { icon: User, label: 'Profile', link: '/profile' },
-        ].map(({ icon: Icon, label, link, onClick }) => (
-          <Link
-            to={link}
-            key={label}
-            onClick={onClick}
-            className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-gray-300/20"
-          >
-            <Icon size={24} />
-            <span>{label}</span>
-          </Link>
-        ))}
+  return (
+    <div
+      className={`flex flex-col h-screen bg-black text-white p-4 fixed top-0 transition-all duration-300 ease-in-out
+        ${isSidebarOpen ? 'w-72' : 'w-20 items-center'}
+      `}
+    >
+      <div className="flex items-center justify-between mb-6 w-full">
+        {isSidebarOpen ? (
+          <h1 className="font-mono text-2xl">Instagram</h1>
+        ) : (
+          <Camera size={26} />
+        )}
+        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+          {isSidebarOpen ? (
+            <ChevronLeft size={24} />
+          ) : (
+            <ChevronRight size={24} />
+          )}
+        </button>
       </div>
 
-      {/* Create Post Modal */}
+      {/* Menu Items */}
+      <div className="flex flex-col flex-grow justify-between w-full">
+        <div className="flex flex-col gap-2">
+          {menuItems.map(({ icon: Icon, label, link, onClick }) => (
+            <Link
+              to={link}
+              key={label}
+              onClick={onClick}
+              className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-300/20 transition-all"
+            >
+              <Icon size={24} />
+              {isSidebarOpen && <span>{label}</span>}
+            </Link>
+          ))}
+        </div>
+
+        {/* More */}
+        <div
+          className="relative hover:bg-gray-300/20 p-2 rounded-lg cursor-pointer flex items-center gap-3 mt-4"
+          onClick={handleModalChange}
+        >
+          <Menu size={24} />
+          {isSidebarOpen && <span>More</span>}
+          {isModalOpen && (
+            <div className="absolute bottom-full mb-2 left-0 w-52 bg-gray-900 text-white rounded-lg shadow-lg py-2 z-50">
+              <button className="flex items-center gap-3 p-3 w-full hover:bg-gray-700">
+                <Settings size={20} />
+                <span>Settings</span>
+              </button>
+              <button
+                onClick={logoutUser}
+                className="flex items-center gap-3 p-3 w-full hover:bg-gray-700"
+              >
+                <LogOut size={20} />
+                <span>Logout</span>
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Create Modal */}
       {isCreateModalOpen && (
-        <div className="absolute left-2 bottom-60 w-52 bg-gray-900 text-white rounded-lg shadow-lg py-2">
+        <div className="absolute left-2 bottom-60 w-52 bg-gray-900 text-white rounded-lg shadow-lg py-2 z-50">
           {loading ? (
             <div className="flex justify-center items-center p-3">
               <Loader2 className="animate-spin" size={24} />
@@ -160,7 +198,7 @@ const Sidebar = () => {
 
       {/* Camera Modal */}
       {isCameraOpen && (
-        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-900 text-white p-4 rounded-lg shadow-lg flex flex-col items-center">
+        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-900 text-white p-4 rounded-lg shadow-lg flex flex-col items-center z-50">
           <video ref={videoRef} autoPlay className="w-64 h-48 rounded-lg" />
           <canvas ref={canvasRef} className="hidden" />
           <button
@@ -177,34 +215,6 @@ const Sidebar = () => {
           </button>
         </div>
       )}
-
-      {/* More Button */}
-      <div
-        className="relative hover:bg-gray-300/20 p-2 text-white rounded-lg cursor-pointer"
-        onClick={handleModalChange}
-      >
-        <div className="flex items-center gap-3">
-          <Menu size={24} />
-          <span>More</span>
-        </div>
-
-        {/* Modal (Settings & Logout) */}
-        {isModalOpen && (
-          <div className="absolute left-0 bottom-10 w-52 bg-gray-900 text-white rounded-lg shadow-lg py-2">
-            <button className="flex items-center gap-3 p-3 w-full hover:bg-gray-700">
-              <Settings size={20} />
-              <span>Settings</span>
-            </button>
-            <button
-              onClick={logoutUser}
-              className="flex items-center gap-3 p-3 w-full hover:bg-gray-700"
-            >
-              <LogOut size={20} />
-              <span>Logout</span>
-            </button>
-          </div>
-        )}
-      </div>
     </div>
   );
 };

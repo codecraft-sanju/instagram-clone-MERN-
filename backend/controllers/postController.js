@@ -2,6 +2,7 @@ import { Post } from '../models/postModel.js';
 import { User } from '../models/userModel.js';
 import cloudinary from 'cloudinary';
 
+
 // Create a new post
 export const createPost = async (req, res) => {
   try {
@@ -74,6 +75,40 @@ export const getUserPosts = async (req, res) => {
     res.status(200).json(posts);
   } catch (error) {
     console.error('Get User Posts Error:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+// Delete a post
+export const deletePost = async (req, res) => {
+  try {
+    const { postId } = req.params;
+
+    const post = await Post.findById(postId);
+    if (!post) return res.status(404).json({ message: 'Post not found' });
+
+  
+    if (post.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Unauthorized to delete this post' });
+    }
+
+    
+    const publicId = post.image.split('/').pop().split('.')[0]; 
+    await cloudinary.v2.uploader.destroy(`instagram-clone-posts/${publicId}`, {
+      resource_type: 'image',
+    });
+
+    
+    await Post.findByIdAndDelete(postId);
+
+    
+    await User.findByIdAndUpdate(req.user._id, {
+      $pull: { posts: post._id },
+    });
+
+    res.status(200).json({ message: 'Post deleted successfully' });
+  } catch (error) {
+    console.error('Delete Post Error:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };

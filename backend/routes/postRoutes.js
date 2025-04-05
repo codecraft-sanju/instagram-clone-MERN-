@@ -5,6 +5,7 @@ import {
   createPost,
   getAllPosts,
   getUserPosts,
+  deletePost,
 } from '../controllers/postController.js';
 
 const router = express.Router();
@@ -12,5 +13,6 @@ const router = express.Router();
 router.post('/create', isAuth, upload.single('file'), createPost);
 router.get('/', isAuth, getAllPosts); 
 router.get('/user/:userId', isAuth, getUserPosts); 
+router.delete('/:postId', isAuth, deletePost);
 
 export default router;

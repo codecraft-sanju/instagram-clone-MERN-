@@ -1,13 +1,14 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const PostContext = createContext();
 
 export const PostProvider = ({ children }) => {
-  const [posts, setPosts] = useState([]); // All posts for feed
-  const [userPosts, setUserPosts] = useState([]); // Specific user posts
-  const [loadingPosts, setLoadingPosts] = useState(false); // For feed posts
-  const [loadingUserPosts, setLoadingUserPosts] = useState(false); // For user-specific posts
+  const [posts, setPosts] = useState([]);
+  const [userPosts, setUserPosts] = useState([]);
+  const [loadingPosts, setLoadingPosts] = useState(false);
+  const [loadingUserPosts, setLoadingUserPosts] = useState(false);
 
   // Fetch all posts (for feed)
   const fetchPosts = async () => {
@@ -16,10 +17,8 @@ export const PostProvider = ({ children }) => {
       const { data } = await axios.get('/api/posts');
       setPosts(data);
     } catch (error) {
-      console.error(
-        'Error fetching posts:',
-        error.response?.data?.message || error.message,
-      );
+      toast.error(error.response?.data?.message || 'Error fetching posts');
+      console.error('Error fetching posts:', error);
     }
     setLoadingPosts(false);
   };
@@ -31,14 +30,13 @@ export const PostProvider = ({ children }) => {
       const { data } = await axios.get(`/api/posts/user/${userId}`);
       setUserPosts(data);
     } catch (error) {
-      console.error(
-        'Error fetching user posts:',
-        error.response?.data?.message || error.message,
-      );
+      toast.error(error.response?.data?.message || 'Error fetching user posts');
+      console.error('Error fetching user posts:', error);
     }
     setLoadingUserPosts(false);
   };
 
+  // Create a new post
   const createPost = async (file) => {
     try {
       const formData = new FormData();
@@ -51,16 +49,32 @@ export const PostProvider = ({ children }) => {
       });
 
       setPosts((prevPosts) => [data.post, ...prevPosts]);
+      toast.success('Post created successfully');
+      window.location.reload()
     } catch (error) {
-      console.error(
-        'Error creating post:',
-        error.response?.data?.message || error.message,
-      );
+      toast.error(error.response?.data?.message || 'Error creating post');
+      console.error('Error creating post:', error);
+    }
+  };
+
+  // Delete a post
+  const deletePost = async (postId) => {
+    try {
+      await axios.delete(`/api/posts/${postId}`, { withCredentials: true });
+
+      setPosts((prev) => prev.filter((post) => post._id !== postId));
+      setUserPosts((prev) => prev.filter((post) => post._id !== postId));
+
+      toast.success('Post deleted successfully');
+      window.location.reload()
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Error deleting post');
+      console.error('Error deleting post:', error);
     }
   };
 
   useEffect(() => {
-    fetchPosts(); // Auto-fetch posts on mount
+    fetchPosts();
   }, []);
 
   return (
@@ -72,6 +86,7 @@ export const PostProvider = ({ children }) => {
         loadingUserPosts,
         fetchUserPosts,
         createPost,
+        deletePost,
       }}
     >
       {children}
