@@ -4,15 +4,20 @@ import './index.css';
 import App from './App.jsx';
 import { UserProvider } from './context/UserContext.jsx';
 import { PostProvider } from './context/PostContext.jsx';
-import { Provider } from 'react-redux'; // Import Redux Provider
-import store from './redux/store'; // Import Redux Store
+import { FollowProvider } from './context/followContext.jsx';
+import { Provider } from 'react-redux'; 
+import store from './redux/store'; 
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>
-      <PostProvider>
-        <App />
-      </PostProvider>
+      <UserProvider>
+        <PostProvider>
+          <FollowProvider>
+            <App />
+          </FollowProvider>
+        </PostProvider>
+      </UserProvider>
     </Provider>
   </StrictMode>,
 );
